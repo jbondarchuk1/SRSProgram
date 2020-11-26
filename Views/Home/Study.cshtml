@@ -1,0 +1,88 @@
+﻿@model SRSProgramMVC.ViewModels.RenderList
+
+
+@{
+    ViewBag.Title = "Study Page";
+}
+
+
+<script src="~/Scripts/Study.js" defer></script>
+
+@using (Html.BeginForm("Study", "Home", FormMethod.Post, new { id = "vocabForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="newVocab">
+        <table class="table">
+            <tr>
+                <th>
+                    Kanji
+                </th>
+                <th>
+                    Hiragana
+                </th>
+                <th>
+                    English Meaning
+                </th>
+                <th>
+                    Done Studying Today
+                </th>
+            </tr>
+            <!--foreach (SRSProgramMVC.Models.PostVocab vocab in Model.dictionaryList)-->
+            @if (Model.dictionaryList != null)
+            {
+                for (int i = 0; i < Model.dictionaryList.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].Kanji)
+                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].Kanji)
+                            @*<input type="hidden" name="Kanji" value="@Model.dictionaryList[i].Kanji" />*@
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].Hiragana)
+                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].Hiragana)
+                            @*<input type="hidden" name="Hiragana" value="@Model.dictionaryList[i].Hiragana" />*@
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].EnglishMeaning)
+                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].EnglishMeaning)
+                            @*<input type="hidden" name="EnglishMeaning" value="@Model.dictionaryList[i].EnglishMeaning" />*@
+                        </td>
+                        <td>
+                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].DictionaryVocabID)
+                            @*<input type="hidden" name="DictionaryVocabID" value="@Model.dictionaryList[i].DictionaryVocabID" />*@
+                            <!--the internet told me this returns false if you put nothing so....-->
+
+                            @if (Model.dictionaryList[i].doneStudying == false)
+                            {
+                                @Html.CheckBoxFor(modelItem => Model.dictionaryList[i].doneStudying, new { @checked = "unchecked" })
+                            }
+                            else
+                            {
+                                @Html.CheckBoxFor(modelItem => Model.dictionaryList[i].doneStudying, new { @checked = "checked" })
+                            }
+
+                            @*<input type="checkbox" name="doneStudying" value="@((bool)Model.dictionaryList[i].doneStudying)" />*@
+
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+    <input type="submit" name="action" value="Submit Studied Words" />
+    @*<input type="submit" name="action" value="Grab New Words" />*@
+    <div class="links">
+        <a href="https://localhost:44376/Home/AddVocabulary">Add New Vocabulary</a>
+    </div>
+}
+<script>document.getElementById('vocabForm').reset();</script>
+
+@using (Html.BeginForm("Study", "Home", FormMethod.Get))
+{
+    @Html.AntiForgeryToken()
+    if (Model.dictionaryList == null)
+    {
+        <input type="submit" name="action" value="Roll New Words" />
+    }
+}

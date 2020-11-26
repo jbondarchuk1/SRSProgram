@@ -1,0 +1,45 @@
+﻿@model IEnumerable<SRSProgramMVC.Models.DictionaryVocab>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Kanji)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Hiragana)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EnglishMeaning)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Kanji)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Hiragana)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EnglishMeaning)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.DictionaryVocabID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.DictionaryVocabID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.DictionaryVocabID })
+        </td>
+    </tr>
+}
+
+</table>
