@@ -251,20 +251,14 @@
     <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
-    <Content Include="Views\CurrentVocabs\Create.cshtml" />
     <Content Include="Views\CurrentVocabs\Delete.cshtml" />
-    <Content Include="Views\CurrentVocabs\Details.cshtml" />
-    <Content Include="Views\CurrentVocabs\Edit.cshtml" />
     <Content Include="Views\CurrentVocabs\Index.cshtml" />
     <Content Include="Views\DictionaryVocabs\Create.cshtml" />
     <Content Include="Views\DictionaryVocabs\Delete.cshtml" />
     <Content Include="Views\DictionaryVocabs\Details.cshtml" />
     <Content Include="Views\DictionaryVocabs\Edit.cshtml" />
     <Content Include="Views\DictionaryVocabs\Index.cshtml" />
-    <Content Include="Views\NewVocabs\Create.cshtml" />
     <Content Include="Views\NewVocabs\Delete.cshtml" />
-    <Content Include="Views\NewVocabs\Details.cshtml" />
-    <Content Include="Views\NewVocabs\Edit.cshtml" />
     <Content Include="Views\NewVocabs\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

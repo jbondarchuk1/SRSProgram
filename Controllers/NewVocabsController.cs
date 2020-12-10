@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using SRSProgramMVC.Models;
 
 namespace SRSProgramMVC.Controllers
@@ -13,90 +15,25 @@ namespace SRSProgramMVC.Controllers
     public class NewVocabsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        static ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+        private static readonly string currentUserId = user.Id;
 
         // GET: NewVocabs
+        [Authorize]
         public ActionResult Index()
         {
-            return View(db.NewVocabs.ToList());
-        }
-
-        // GET: NewVocabs/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            NewVocab newVocab = db.NewVocabs.Find(id);
-            if (newVocab == null)
-            {
-                return HttpNotFound();
-            }
-            return View(newVocab);
-        }
-
-        // GET: NewVocabs/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: NewVocabs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "NewVocabID")] NewVocab newVocab)
-        {
-            if (ModelState.IsValid)
-            {
-                db.NewVocabs.Add(newVocab);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            return View(newVocab);
-        }
-
-        // GET: NewVocabs/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            NewVocab newVocab = db.NewVocabs.Find(id);
-            if (newVocab == null)
-            {
-                return HttpNotFound();
-            }
-            return View(newVocab);
-        }
-
-        // POST: NewVocabs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "NewVocabID")] NewVocab newVocab)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(newVocab).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(newVocab);
+            var newVocabs = db.NewVocabs.SqlQuery($"SELECT * FROM dbo.NewVocabs WHERE UserId=N\'{currentUserId}\';").ToList();
+            return View(newVocabs);
         }
 
         // GET: NewVocabs/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(string id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            NewVocab newVocab = db.NewVocabs.Find(id);
+            CurrentVocab newVocab = db.CurrentVocabs.SqlQuery($"SELECT TOP 1 * FROM dbo.CurrentVocabs WHERE UserId=N\'{currentUserId}\' AND DictionaryVocabID={id};").Single();
             if (newVocab == null)
             {
                 return HttpNotFound();
@@ -107,9 +44,9 @@ namespace SRSProgramMVC.Controllers
         // POST: NewVocabs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(string id)
         {
-            NewVocab newVocab = db.NewVocabs.Find(id);
+            NewVocab newVocab = db.NewVocabs.SqlQuery($"SELECT TOP 1 * FROM dbo.NewVocabs WHERE UserId=N\'{currentUserId}\' AND DictionaryVocabID={id};").Single();
             db.NewVocabs.Remove(newVocab);
             db.SaveChanges();
             return RedirectToAction("Index");

@@ -4,13 +4,19 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Your Currently Studying Vocabulary</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
 <table class="table">
     <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.DictionaryVocab.Kanji)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DictionaryVocab.Hiragana)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DictionaryVocab.EnglishMeaning)
+        </th>
         <th>
             @Html.DisplayNameFor(model => model.RepCount)
         </th>
@@ -21,19 +27,26 @@
     </tr>
 
 @foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.RepCount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateNextStudy)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.CurrentVocabID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.CurrentVocabID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.CurrentVocabID })
-        </td>
-    </tr>
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.DictionaryVocab.Kanji)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.DictionaryVocab.Hiragana)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.DictionaryVocab.EnglishMeaning)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.RepCount)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.DateNextStudy)
+    </td>
+    <td>
+        @Html.ActionLink("Delete", "Delete", new { id = item.DictionaryVocabID })
+    </td>
+</tr>
 }
 
 </table>

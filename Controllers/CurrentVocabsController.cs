@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using SRSProgramMVC.Models;
 
 namespace SRSProgramMVC.Controllers
@@ -13,21 +16,27 @@ namespace SRSProgramMVC.Controllers
     public class CurrentVocabsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        static ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+        private static readonly string currentUserId = user.Id;
 
-        // GET: CurrentVocabs
+        // GET: CurrentVocabs/Index
+        [Authorize]
         public ActionResult Index()
         {
-            return View(db.CurrentVocabs.ToList());
+
+            var currentVocabs = db.CurrentVocabs.SqlQuery($"SELECT * FROM dbo.CurrentVocabs WHERE UserId=N\'{currentUserId}\';").ToList();
+            return View(currentVocabs);
         }
 
-        // GET: CurrentVocabs/Details/5
-        public ActionResult Details(int? id)
+        // GET: CurrentVocabs/Delete/DictionaryId
+        [Authorize]
+        public ActionResult Delete(string id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            CurrentVocab currentVocab = db.CurrentVocabs.Find(id);
+            CurrentVocab currentVocab = db.CurrentVocabs.SqlQuery($"SELECT TOP 1 * FROM dbo.CurrentVocabs WHERE UserId=N\'{currentUserId}\' AND DictionaryVocabID={id};").Single();
             if (currentVocab == null)
             {
                 return HttpNotFound();
@@ -35,81 +44,14 @@ namespace SRSProgramMVC.Controllers
             return View(currentVocab);
         }
 
-        // GET: CurrentVocabs/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: CurrentVocabs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "CurrentVocabID,RepCount,DateNextStudy")] CurrentVocab currentVocab)
-        {
-            if (ModelState.IsValid)
-            {
-                db.CurrentVocabs.Add(currentVocab);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            return View(currentVocab);
-        }
-
-        // GET: CurrentVocabs/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CurrentVocab currentVocab = db.CurrentVocabs.Find(id);
-            if (currentVocab == null)
-            {
-                return HttpNotFound();
-            }
-            return View(currentVocab);
-        }
-
-        // POST: CurrentVocabs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "CurrentVocabID,RepCount,DateNextStudy")] CurrentVocab currentVocab)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(currentVocab).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(currentVocab);
-        }
-
-        // GET: CurrentVocabs/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CurrentVocab currentVocab = db.CurrentVocabs.Find(id);
-            if (currentVocab == null)
-            {
-                return HttpNotFound();
-            }
-            return View(currentVocab);
-        }
-
-        // POST: CurrentVocabs/Delete/5
+        // POST: CurrentVocabs/Delete/DictionaryId
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(string id)
         {
-            CurrentVocab currentVocab = db.CurrentVocabs.Find(id);
+            CurrentVocab currentVocab = db.CurrentVocabs.SqlQuery($"SELECT TOP 1 * FROM dbo.CurrentVocabs WHERE UserId=N\'{currentUserId}\' AND DictionaryVocabID={id};").Single();
+            Debug.WriteLine("Vocab: " + currentVocab.DictionaryVocab);
             db.CurrentVocabs.Remove(currentVocab);
             db.SaveChanges();
             return RedirectToAction("Index");

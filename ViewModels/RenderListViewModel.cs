@@ -7,7 +7,8 @@ namespace SRSProgramMVC.ViewModels
 {
     public class RenderList
     {
-        public List<PostVocab> dictionaryList { get; set; }
+        public List<PostVocab>? currentVocabsList { get; set; }
+        public List<PostVocab>? newVocabsList { get; set; }
     }
     public class PostVocab
     {

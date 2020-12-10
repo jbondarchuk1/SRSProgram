@@ -21,6 +21,13 @@ namespace SRSProgramMVC.Controllers
         static ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
         private static readonly string currentUserId = user.Id;
 
+        //public ActionResult DashBoard()
+        //{
+        //}
+
+        //public ActionResult Settings()
+        //{
+        //}
 
         [Authorize]
         // GET: Home/Study
@@ -29,12 +36,14 @@ namespace SRSProgramMVC.Controllers
             NewVocab[] listOfNewVocabulary = new NewVocab[24];
             listOfNewVocabulary = db.NewVocabs.SqlQuery($"SELECT TOP 10 * FROM dbo.NewVocabs WHERE UserId=N\'{currentUserId}\'").ToArray();
             
-            // this is the only list that gets passed to the view
-            List<CurrentVocab> listCurrentlyStudying = new List<CurrentVocab>();
-            listCurrentlyStudying = db.CurrentVocabs.SqlQuery($"SELECT * FROM dbo.CurrentVocabs WHERE DateNextStudy<=\'{DateTime.Today}\'").ToList();
+            List<CurrentVocab> listCurrentVocab = new List<CurrentVocab>();
+            listCurrentVocab = db.CurrentVocabs.SqlQuery($"SELECT * FROM dbo.CurrentVocabs WHERE DateNextStudy<=\'{DateTime.Today}\'").ToList();
 
-            List<PostVocab> studyDictionaryData = new List<PostVocab>();
-            // grabs list of new vocabulary words, removes them from newVocabs table and adds them to CurrentVocabs
+            List<PostVocab> convertCurrentVocabsData = new List<PostVocab>();
+            List<PostVocab> convertNewVocabsData = new List<PostVocab>();
+
+            // database manipulation
+            // grabs list of new vocabulary words, removes them from newVocabs table and adds them to CurrentVocabs table
             foreach (NewVocab vocab in listOfNewVocabulary)
             {
                 CurrentVocab currentVocab = new CurrentVocab
@@ -46,10 +55,24 @@ namespace SRSProgramMVC.Controllers
                 };
 
                 db.CurrentVocabs.Add(currentVocab);
-                listCurrentlyStudying.Add(currentVocab);
                 db.NewVocabs.Remove(vocab);
             }
-            foreach (CurrentVocab vocab in listCurrentlyStudying)
+
+            // these loops creates the two lists that will be passed into the view model
+            foreach (NewVocab vocab in listOfNewVocabulary)
+            {
+                DictionaryVocab dictionaryForm = db.DictionaryVocabs.Find(vocab.DictionaryVocabID);
+                PostVocab postVocab = new PostVocab
+                {
+                    DictionaryVocabID = dictionaryForm.DictionaryVocabID,
+                    Kanji = dictionaryForm.Kanji,
+                    Hiragana = dictionaryForm.Hiragana,
+                    EnglishMeaning = dictionaryForm.EnglishMeaning,
+                    doneStudying = false
+                };
+                convertNewVocabsData.Add(postVocab);
+            }
+            foreach (CurrentVocab vocab in listCurrentVocab)
             {
                 // convert dictionary vocab into appropriate postvocab view model
                 DictionaryVocab dictionaryForm = db.DictionaryVocabs.Find(vocab.DictionaryVocabID);
@@ -61,13 +84,13 @@ namespace SRSProgramMVC.Controllers
                     EnglishMeaning = dictionaryForm.EnglishMeaning,
                     doneStudying = false
                 };
-
-                studyDictionaryData.Add(postVocab);
+                convertCurrentVocabsData.Add(postVocab);
             }
 
             RenderList renderList = new RenderList()
             {
-                dictionaryList = studyDictionaryData
+                currentVocabsList = convertCurrentVocabsData,
+                newVocabsList = convertNewVocabsData
             };
             ModelState.Clear();
             db.SaveChanges();
@@ -80,23 +103,21 @@ namespace SRSProgramMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Study(RenderList? postVocab)
         {
-            if (postVocab.dictionaryList == null)
+            if (postVocab.currentVocabsList == null && postVocab.newVocabsList == null)
             {
                 return View(postVocab);
-            } 
-                
+            }
 
             // here we need to:
             // update the date of next study for any current vocab with a checkmark next to it
             // pass the same study view back but this time with an updated list only containing vocab with no checkmark
-            
-            List<PostVocab> studyDictionaryData = new List<PostVocab>();
 
-            foreach (PostVocab v in postVocab.dictionaryList)
+            // update database and add remaining study words to a list
+            List<PostVocab> remainingCurrentVocabs = new List<PostVocab>();
+            foreach (PostVocab v in postVocab.currentVocabsList)
             {
                 if (v.doneStudying == true)
                 {
-                    Debug.WriteLine($"{v.DictionaryVocabID}, {currentUserId}");
                     CurrentVocab currentVocab = db.CurrentVocabs.Find(currentUserId, v.DictionaryVocabID);
   
                     if (currentVocab.RepCount < 4)
@@ -115,27 +136,52 @@ namespace SRSProgramMVC.Controllers
                 else
                 {
                     v.doneStudying = false;
-                    Debug.WriteLine($"{v.Kanji}, {v.doneStudying}");
-                    studyDictionaryData.Add(v);
+                    remainingCurrentVocabs.Add(v);
                 }
                 db.SaveChanges();
             }
-            foreach (PostVocab p in studyDictionaryData)
+
+            // update database and add remaining study words to a list
+            List<PostVocab> remainingNewVocabs = new List<PostVocab>();
+            foreach (PostVocab v in postVocab.newVocabsList)
             {
-                Debug.WriteLine($"{p.DictionaryVocabID},{p.doneStudying}");
+                if (v.doneStudying == true)
+                {
+                    // to clarify naming: these are newly added words to the **currentvocabs** table
+                    CurrentVocab newVocab = db.CurrentVocabs.Find(currentUserId, v.DictionaryVocabID);
+
+                    if (newVocab.RepCount < 4)
+                    {
+                        int newRepCount = newVocab.RepCount + 1;
+
+                        DateTime dateToNextStudy = DateToNextStudy(newRepCount, DateTime.Today);
+
+                        CurrentVocab updateThis = db.CurrentVocabs.SqlQuery($"SELECT TOP 1 * FROM dbo.CurrentVocabs WHERE DictionaryVocabID={v.DictionaryVocabID} AND UserId=N\'{currentUserId}\';").Single();
+
+                        updateThis.RepCount = newRepCount;
+                        updateThis.DateNextStudy = dateToNextStudy;
+                        db.SaveChanges();
+                    }
+                }
+                else
+                {
+                    v.doneStudying = false;
+                    remainingNewVocabs.Add(v);
+                }
+                db.SaveChanges();
             }
+            // our two remaining vocabulary lists get passed back into the view
             RenderList renderList = new RenderList()
             {
-                dictionaryList = studyDictionaryData
+                currentVocabsList = remainingCurrentVocabs,
+                newVocabsList = remainingNewVocabs,
             };
             ModelState.Clear();
-            // return View(renderList);
             return View(renderList);
         }
 
 
-
-            [Authorize]
+        [Authorize]
         // GET: Home/AddVocabulary
         public ActionResult AddVocabulary()
         {
@@ -202,8 +248,6 @@ namespace SRSProgramMVC.Controllers
             };
             
             DateTime dateToNextStudy = lastStudyDate.AddDays(Convert.ToDouble(SRSTable[numberOfReps]));
-            // SRSTable[numberOfReps]
-
             return dateToNextStudy;
         }
 

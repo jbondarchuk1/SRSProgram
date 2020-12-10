@@ -7,7 +7,6 @@
 
 
 <script src="~/Scripts/Study.js" defer></script>
-
 @using (Html.BeginForm("Study", "Home", FormMethod.Post, new { id = "vocabForm" }))
 {
     @Html.AntiForgeryToken()
@@ -27,42 +26,69 @@
                     Done Studying Today
                 </th>
             </tr>
-            <!--foreach (SRSProgramMVC.Models.PostVocab vocab in Model.dictionaryList)-->
-            @if (Model.dictionaryList != null)
+            @if (Model.newVocabsList != null)
             {
-                for (int i = 0; i < Model.dictionaryList.Count; i++)
+                <tr><td>New Vocabulary</td></tr>
+                for (int i = 0; i < Model.newVocabsList.Count; i++)
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].Kanji)
-                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].Kanji)
-                            @*<input type="hidden" name="Kanji" value="@Model.dictionaryList[i].Kanji" />*@
+                            @Html.DisplayFor(modelItem => Model.newVocabsList[i].Kanji)
+                            @Html.HiddenFor(modelItem => Model.newVocabsList[i].Kanji)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].Hiragana)
-                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].Hiragana)
-                            @*<input type="hidden" name="Hiragana" value="@Model.dictionaryList[i].Hiragana" />*@
+                            @Html.DisplayFor(modelItem => Model.newVocabsList[i].Hiragana)
+                            @Html.HiddenFor(modelItem => Model.newVocabsList[i].Hiragana)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => Model.dictionaryList[i].EnglishMeaning)
-                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].EnglishMeaning)
-                            @*<input type="hidden" name="EnglishMeaning" value="@Model.dictionaryList[i].EnglishMeaning" />*@
+                            @Html.DisplayFor(modelItem => Model.newVocabsList[i].EnglishMeaning)
+                            @Html.HiddenFor(modelItem => Model.newVocabsList[i].EnglishMeaning)
                         </td>
                         <td>
-                            @Html.HiddenFor(modelItem => Model.dictionaryList[i].DictionaryVocabID)
-                            @*<input type="hidden" name="DictionaryVocabID" value="@Model.dictionaryList[i].DictionaryVocabID" />*@
-                            <!--the internet told me this returns false if you put nothing so....-->
+                            @Html.HiddenFor(modelItem => Model.newVocabsList[i].DictionaryVocabID)
 
-                            @if (Model.dictionaryList[i].doneStudying == false)
+                            @if (Model.newVocabsList[i].doneStudying == false)
                             {
-                                @Html.CheckBoxFor(modelItem => Model.dictionaryList[i].doneStudying, new { @checked = "unchecked" })
+                                @Html.CheckBoxFor(modelItem => Model.newVocabsList[i].doneStudying, new { @checked = "unchecked" })
                             }
                             else
                             {
-                                @Html.CheckBoxFor(modelItem => Model.dictionaryList[i].doneStudying, new { @checked = "checked" })
+                                @Html.CheckBoxFor(modelItem => Model.newVocabsList[i].doneStudying, new { @checked = "checked" })
                             }
 
-                            @*<input type="checkbox" name="doneStudying" value="@((bool)Model.dictionaryList[i].doneStudying)" />*@
+                        </td>
+                    </tr>
+                }
+            }
+            <tr><td>Review Vocabulary</td></tr>
+            @if (Model.currentVocabsList != null)
+            {
+                for (int i = 0; i < Model.currentVocabsList.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.currentVocabsList[i].Kanji)
+                            @Html.HiddenFor(modelItem => Model.currentVocabsList[i].Kanji)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.currentVocabsList[i].Hiragana)
+                            @Html.HiddenFor(modelItem => Model.currentVocabsList[i].Hiragana)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model.currentVocabsList[i].EnglishMeaning)
+                            @Html.HiddenFor(modelItem => Model.currentVocabsList[i].EnglishMeaning)
+                        </td>
+                        <td>
+                            @Html.HiddenFor(modelItem => Model.currentVocabsList[i].DictionaryVocabID)
+
+                            @if (Model.currentVocabsList[i].doneStudying == false)
+                            {
+                                @Html.CheckBoxFor(modelItem => Model.currentVocabsList[i].doneStudying, new { @checked = "unchecked" })
+                            }
+                            else
+                            {
+                                @Html.CheckBoxFor(modelItem => Model.currentVocabsList[i].doneStudying, new { @checked = "checked" })
+                            }
 
                         </td>
                     </tr>
@@ -71,7 +97,6 @@
         </table>
     </div>
     <input type="submit" name="action" value="Submit Studied Words" />
-    @*<input type="submit" name="action" value="Grab New Words" />*@
     <div class="links">
         <a href="https://localhost:44376/Home/AddVocabulary">Add New Vocabulary</a>
     </div>
@@ -81,7 +106,7 @@
 @using (Html.BeginForm("Study", "Home", FormMethod.Get))
 {
     @Html.AntiForgeryToken()
-    if (Model.dictionaryList == null)
+    if (Model.newVocabsList == null || Model.newVocabsList.Count == 0)
     {
         <input type="submit" name="action" value="Roll New Words" />
     }
