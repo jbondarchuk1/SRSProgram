@@ -23,6 +23,8 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Study", "Study", "Home")</li>
                     <li>@Html.ActionLink("Add Word", "AddVocabulary", "Home")</li>
+                    <li>@Html.ActionLink("View New Words", "Index", "NewVocabs")</li>
+                    <li>@Html.ActionLink("View SRS Review Words", "Index", "CurrentVocabs")</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

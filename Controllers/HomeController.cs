@@ -21,9 +21,10 @@ namespace SRSProgramMVC.Controllers
         static ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
         private static readonly string currentUserId = user.Id;
 
-        //public ActionResult DashBoard()
-        //{
-        //}
+        // public ActionResult DashBoard()
+        // {
+        //      return View()
+        // }
 
         //public ActionResult Settings()
         //{
@@ -197,7 +198,7 @@ namespace SRSProgramMVC.Controllers
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-
+            //  TODO: handle adding vocabulary words that are already in your to study list
             if (ModelState.IsValid)
             {
                 int? queryDictionaryID = null;

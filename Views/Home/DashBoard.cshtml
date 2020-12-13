@@ -1,0 +1,14 @@
+﻿
+@{
+    ViewBag.Title = "DashBoard";
+}
+
+<h2>DashBoard</h2>
+
+@*the following are a bunch of links for things that the user needs. I dont know what to make the dashboard look like though*@
+<ul>
+    <li>@Html.ActionLink("Study", "Study", "Home")</li>
+    <li>@Html.ActionLink("Add Word", "AddVocabulary", "Home")</li>
+    <li>@Html.ActionLink("View New Words", "Index", "NewVocabs")</li>
+    <li>@Html.ActionLink("View SRS Review Words", "Index", "CurrentVocabs")</li>
+</ul>
